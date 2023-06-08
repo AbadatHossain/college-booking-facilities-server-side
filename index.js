@@ -11,7 +11,7 @@ app.use(express.json());
 
 
 app.get("/", (req, res) => {
-  res.send("summer camp Server is running");
+  res.send("Summer camp Server is running");
 });
 
 app.listen(port, () => {
