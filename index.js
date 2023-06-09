@@ -89,7 +89,10 @@ app.post("/selectedClass", async (req, res) => {
     }
   })
 
-
+  app.get('/selectedClass/:email', async (req, res) => {
+    const { email } = req.params;
+    
+  })
 
 
     await client.db("admin").command({ ping: 1 });
