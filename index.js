@@ -30,12 +30,13 @@ async function run() {
     // Send a ping to confirm a successful connection
 
     const usersCollection = client.db("schoolCamp").collection("users");
-    const classCollection = client.db('schoolCamp').collection('instructor')
-    const bookingsCollection = client.db('schoolCamp').collection('classes')
+    const instructorCollection = client.db('schoolCamp').collection('instructor')
+    const classCollection = client.db('schoolCamp').collection('classes')
+    const selectedClassCollection = client.db('schoolCamp').collection('selectedClass')
 
 
  // Save user email and role in DB
- 
+
  app.put('/users/:email', async (req, res) => {
     const email = req.params.email
     const user = req.body
@@ -45,12 +46,23 @@ async function run() {
       $set: user,
     }
     const result = await usersCollection.updateOne(query, updateDoc, options)
-    console.log(result)
+    // console.log(result)
     res.send(result)
   })
 
+app.get('/getClasses', async(req, res)=>{
+    const result = await classCollection.find().toArray()
+    // console.log(result)
+    res.send(result)
+})
 
+app.post("/selectedClass", async (req, res) => {
+    const body = req.body;
+    body.createdAt = new Date();
+    console.log(body);
+    const result = await selectedClassCollection.insertOne(body);
 
+  });
 
 
 
