@@ -11,7 +11,7 @@ app.use(express.json());
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion,  } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_user}:${process.env.DB_PASS}@cluster0.dxzduzz.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -87,14 +87,27 @@ app.post("/selectedClass", async (req, res) => {
         status: false,
       });
     }
-  })
+  });
 
   app.get('/selectedClass/:email', async (req, res) => {
     const { email } = req.params;
     const result = await selectedClassCollection.find({ email: email }).toArray()
     // console.log(result)
     res.send(result)
-  })
+  });
+
+  app.delete("/selectedClass/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    const result = await selectedClassCollection.deleteOne(query);
+    res.send(result);
+  });
+
+  await client.db("admin").command({ ping: 1 });
+  console.log(
+    "Pinged your deployment. You successfully connected to MongoDB!"
+  );
+
 
 
     await client.db("admin").command({ ping: 1 });
@@ -105,13 +118,6 @@ app.post("/selectedClass", async (req, res) => {
   }
 }
 run().catch(console.dir);
-
-
-
-
-
-
-
 
 
 app.get("/", (req, res) => {
