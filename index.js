@@ -56,6 +56,12 @@ app.get('/getClasses', async(req, res)=>{
     res.send(result)
 })
 
+app.get('/instructorClasses', async(req, res)=>{
+    const result = await instructorCollection.find().toArray()
+    // console.log(result)
+    res.send(result)
+})
+
 app.post("/selectedClass", async (req, res) => {
     const body = req.body;
     body.createdAt = new Date();
@@ -98,6 +104,7 @@ app.post("/selectedClass", async (req, res) => {
 
   app.delete("/selectedClass/:id", async (req, res) => {
     const id = req.params.id;
+    console.log(id)
     const query = { _id: new ObjectId(id) };
     const result = await selectedClassCollection.deleteOne(query);
     res.send(result);
