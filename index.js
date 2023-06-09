@@ -77,7 +77,16 @@ app.post("/selectedClass", async (req, res) => {
     // console.log(email);
     const result = await usersCollection.findOne({ email: email });
     // console.log(result);
-    
+    if (result.role === "student") {
+      return res.status(200).send(true);
+    } else if (result.role !== "student") {
+      return res.status(200).send(false);
+    } else {
+      return res.status(404).send({
+        message: "can not get try again later",
+        status: false,
+      });
+    }
   })
 
 
