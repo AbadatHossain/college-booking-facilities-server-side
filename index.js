@@ -61,7 +61,14 @@ app.post("/selectedClass", async (req, res) => {
     body.createdAt = new Date();
     console.log(body);
     const result = await selectedClassCollection.insertOne(body);
-
+    if (result?.insertedId) {
+      return res.status(200).send(result);
+    } else {
+      return res.status(404).send({
+        message: "can not insert try again leter",
+        status: false,
+      });
+    }
   });
 
 
