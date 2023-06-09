@@ -30,9 +30,24 @@ async function run() {
     // Send a ping to confirm a successful connection
 
     const usersCollection = client.db("schoolCamp").collection("users");
+    const classCollection = client.db('schoolCamp').collection('instructor')
+    const bookingsCollection = client.db('schoolCamp').collection('classes')
 
 
-
+ // Save user email and role in DB
+ 
+ app.put('/users/:email', async (req, res) => {
+    const email = req.params.email
+    const user = req.body
+    const query = { email: email }
+    const options = { upsert: true }
+    const updateDoc = {
+      $set: user,
+    }
+    const result = await usersCollection.updateOne(query, updateDoc, options)
+    console.log(result)
+    res.send(result)
+  })
 
 
 
