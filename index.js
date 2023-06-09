@@ -72,6 +72,13 @@ app.post("/selectedClass", async (req, res) => {
   });
 
 
+  app.get("/user/:email", async (req, res) => {
+    const { email } = req.params;
+    // console.log(email);
+    const result = await usersCollection.findOne({ email: email });
+    // console.log(result);
+    
+  })
 
 
 
