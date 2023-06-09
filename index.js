@@ -91,7 +91,9 @@ app.post("/selectedClass", async (req, res) => {
 
   app.get('/selectedClass/:email', async (req, res) => {
     const { email } = req.params;
-    
+    const result = await selectedClassCollection.find({ email: email }).toArray()
+    // console.log(result)
+    res.send(result)
   })
 
 
