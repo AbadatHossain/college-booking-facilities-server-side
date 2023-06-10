@@ -33,109 +33,160 @@ async function run() {
     const instructorCollection = client.db('schoolCamp').collection('instructor')
     const classCollection = client.db('schoolCamp').collection('classes')
     const selectedClassCollection = client.db('schoolCamp').collection('selectedClass')
+    const enrolledClassCollection = client.db('schoolCamp').collection('enrolledClass')
 
 
- // Save user email and role in DB
+    // Save user email and role in DB
 
- app.put('/users/:email', async (req, res) => {
-    const email = req.params.email
-    const user = req.body
-    const query = { email: email }
-    const options = { upsert: true }
-    const updateDoc = {
-      $set: user,
-    }
-    const result = await usersCollection.updateOne(query, updateDoc, options)
-    // console.log(result)
-    res.send(result)
-  })
+    app.put('/users/:email', async (req, res) => {
+      const email = req.params.email
+      const user = req.body
+      const query = { email: email }
+      const options = { upsert: true }
+      const updateDoc = {
+        $set: user,
+      }
+      const result = await usersCollection.updateOne(query, updateDoc, options)
+      // console.log(result)
+      res.send(result)
+    })
 
-   // getClasses api with classCollection in DB
+    app.get('/getClasses', async (req, res) => {
+      const result = await classCollection.find().toArray()
+      // console.log(result)
+      res.send(result)
+    })
 
-app.get('/getClasses', async(req, res)=>{
-    const result = await classCollection.find().toArray()
-    // console.log(result)
-    res.send(result)
-})
+    app.post("/selectedClass", async (req, res) => {
+      const body = req.body;
+      body.createdAt = new Date();
+      delete body._id;
+      const exists = await selectedClassCollection.findOne({ name: body.name, email: body.email });
+      if (!exists) {
+        const result = await selectedClassCollection.insertOne(body);
+        if (result?.insertedId) {
+          return res.status(200).send(result);
+        } else {
+          return res.status(404).send({
+            message: "can not insert try again leter",
+            status: false,
+          });
+        }
+      } else {
+        res.status(404).send({
+          message: "can't select the same class again",
+          status: false,
+        })
+      }
+    });
+    app.get("/user/:email", async (req, res) => {
+      const { email } = req.params;
+      // console.log(email);
+      const result = await usersCollection.findOne({ email: email });
+      // console.log(result);
+      if (result.role === "student") {
+        return res.status(200).send(true);
+      } else if (result.role !== "student") {
+        return res.status(200).send(false);
+      } else {
+        return res.status(404).send({
+          message: "can not get try again later",
+          status: false,
+        });
+      }
+    })
+    app.get("/checkInstructor/:email", async (req, res) => {
+      const { email } = req.params;
+      // console.log(email);
+      const result = await usersCollection.findOne({ email: email });
+      // console.log(result);
+      if (result.role === "instructor") {
+        return res.status(200).send(true);
+      } else if (result.role !== "instructor") {
+        return res.status(200).send(false);
+      } else {
+        return res.status(404).send({
+          message: "can not get try again later",
+          status: false,
+        });
+      }
+    })
+    app.get("/checkAdmin/:email", async (req, res) => {
+      const { email } = req.params;
+      // console.log(email);
+      const result = await usersCollection.findOne({ email: email });
+      // console.log(result);
+      if (result.role === "admin") {
+        return res.status(200).send(true);
+      } else if (result.role !== "admin") {
+        return res.status(200).send(false);
+      } else {
+        return res.status(404).send({
+          message: "can not get try again later",
+          status: false,
+        });
+      }
+    })
+    app.get("/checkUser/:email", async (req, res) => {
+      const { email } = req.params;
+      // console.log(email);
+      const result = await usersCollection.findOne({ email: email });
+      // console.log(result);
+      if (result) {
+        return res.status(200).send(result);
+      } else {
+        return res.status(404).send({
+          message: "can not get try again later",
+          status: false,
+        });
+      }
+    })
+
+    app.get('/selectedClass/:email', async (req, res) => {
+      const { email } = req.params;
+      const result = await selectedClassCollection.find({ email: email }).toArray()
+      // console.log(result)
+      res.send(result)
+    })
+
+    app.delete("/selectedClass/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await selectedClassCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.post("/payment", async (req, res) => {
+      const id = req.body._id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const deleteClass = await selectedClassCollection.deleteOne(query);
+      const update = await classCollection.updateOne({ name: req.body.name }, { $inc: { availableSeats: -1 } });
+      delete req.body._id;
+      req.body.createdAt = new Date();
+      const add = await enrolledClassCollection.insertOne(req.body);
+      if (add?.insertedId) {
+        return res.status(200).send(add);
+      } else {
+        return res.status(404).send({
+          message: "can not enroll try again later",
+          status: false,
+        });
+      }
+    });
+
+    app.get('/enrolledClasses/:email', async (req, res) => {
+      const { email } = req.params;
+      const result = await enrolledClassCollection.find({ email: email }).toArray()
+      // console.log(result)
+      res.send(result)
+    })
 
 app.get('/instructorClasses', async(req, res)=>{
     const result = await instructorCollection.find().toArray()
     // console.log(result)
     res.send(result)
 })
-
-
- // selectedClass post api with selectedClassCollection in DB
-
-app.post("/selectedClass", async (req, res) => {
-    const body = req.body;
-    body.createdAt = new Date();
-    console.log(body);
-    const result = await selectedClassCollection.insertOne(body);
-    if (result?.insertedId) {
-      return res.status(200).send(result);
-    } else {
-      return res.status(404).send({
-        message: "can not insert try again leter",
-        status: false,
-      });
-    }
-  });
-
-
-  // get user api with email, usersCollection in DB
-
-  app.get("/user/:email", async (req, res) => {
-    const { email } = req.params;
-    // console.log(email);
-    const result = await usersCollection.findOne({ email: email });
-    // console.log(result);
-
-    if (result === null) {
-        return res.status(404).send({
-          message: "can not get try again later",
-          status: false,
-        });
-      }
-
-    if (result.role === "student") {
-      return res.status(200).send(true);
-    } else if (result.role !== "student") {
-      return res.status(200).send(false);
-    }
-    // } else {
-    //   return res.status(404).send({
-    //     message: "can not get try again later",
-    //     status: false,
-    //   });
-    // }
-  });
-
-
-  // get selectedClass with email, selectedClassCollection in DB
-
-  app.get('/selectedClass/:email', async (req, res) => {
-    const { email } = req.params;
-    const result = await selectedClassCollection.find({ email: email }).toArray()
-    // console.log(result)
-    res.send(result)
-  });
-
-
-   // delete selectedClass with id, selectedClassCollection in DB
-
-  app.delete("/selectedClass/:id", async (req, res) => {
-    const id = req.params.id;
-    console.log(id)
-    const query = { _id: new ObjectId(id) };
-    const result = await selectedClassCollection.deleteOne(query);
-    res.send(result);
-  });
-
-  await client.db("admin").command({ ping: 1 });
-  console.log(
-    "Pinged your deployment. You successfully connected to MongoDB!"
-  );
 
 
 
