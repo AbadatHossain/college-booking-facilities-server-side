@@ -50,6 +50,8 @@ async function run() {
     res.send(result)
   })
 
+   // getClasses api with classCollection in DB
+
 app.get('/getClasses', async(req, res)=>{
     const result = await classCollection.find().toArray()
     // console.log(result)
@@ -61,6 +63,9 @@ app.get('/instructorClasses', async(req, res)=>{
     // console.log(result)
     res.send(result)
 })
+
+
+ // selectedClass post api with selectedClassCollection in DB
 
 app.post("/selectedClass", async (req, res) => {
     const body = req.body;
@@ -78,22 +83,36 @@ app.post("/selectedClass", async (req, res) => {
   });
 
 
+  // get user api with email, usersCollection in DB
+
   app.get("/user/:email", async (req, res) => {
     const { email } = req.params;
     // console.log(email);
     const result = await usersCollection.findOne({ email: email });
     // console.log(result);
+
+    if (result === null) {
+        return res.status(404).send({
+          message: "can not get try again later",
+          status: false,
+        });
+      }
+
     if (result.role === "student") {
       return res.status(200).send(true);
     } else if (result.role !== "student") {
       return res.status(200).send(false);
-    } else {
-      return res.status(404).send({
-        message: "can not get try again later",
-        status: false,
-      });
     }
+    // } else {
+    //   return res.status(404).send({
+    //     message: "can not get try again later",
+    //     status: false,
+    //   });
+    // }
   });
+
+
+  // get selectedClass with email, selectedClassCollection in DB
 
   app.get('/selectedClass/:email', async (req, res) => {
     const { email } = req.params;
@@ -101,6 +120,9 @@ app.post("/selectedClass", async (req, res) => {
     // console.log(result)
     res.send(result)
   });
+
+
+   // delete selectedClass with id, selectedClassCollection in DB
 
   app.delete("/selectedClass/:id", async (req, res) => {
     const id = req.params.id;
