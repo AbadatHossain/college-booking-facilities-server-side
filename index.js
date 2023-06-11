@@ -9,9 +9,7 @@ const port = process.env.PORT || 8000;
 app.use(cors());
 app.use(express.json());
 
-
-
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_user}:${process.env.DB_PASS}@cluster0.dxzduzz.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -20,7 +18,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
@@ -30,38 +28,53 @@ async function run() {
     // Send a ping to confirm a successful connection
 
     const usersCollection = client.db("schoolCamp").collection("users");
-    const instructorCollection = client.db('schoolCamp').collection('instructor')
-    const classCollection = client.db('schoolCamp').collection('classes')
-    const selectedClassCollection = client.db('schoolCamp').collection('selectedClass')
-    const enrolledClassCollection = client.db('schoolCamp').collection('enrolledClass')
-
+    const instructorCollection = client
+      .db("schoolCamp")
+      .collection("instructor");
+    const classCollection = client.db("schoolCamp").collection("classes");
+    const selectedClassCollection = client
+      .db("schoolCamp")
+      .collection("selectedClass");
+    const enrolledClassCollection = client
+      .db("schoolCamp")
+      .collection("enrolledClass");
 
     // Save user email and role in DB
 
-    app.put('/users/:email', async (req, res) => {
-      const email = req.params.email
-      const user = req.body
-      const query = { email: email }
-      const options = { upsert: true }
+    app.put("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const query = { email: email };
+      const options = { upsert: true };
       const updateDoc = {
         $set: user,
-      }
-      const result = await usersCollection.updateOne(query, updateDoc, options)
+      };
+      const result = await usersCollection.updateOne(query, updateDoc, options);
       // console.log(result)
-      res.send(result)
-    })
+      res.send(result);
+    });
 
-    app.get('/getClasses', async (req, res) => {
-      const result = await classCollection.find().toArray()
+    app.get("/getClasses", async (req, res) => {
+      const result = await classCollection
+        .find({ status: "approved" })
+        .toArray();
       // console.log(result)
-      res.send(result)
-    })
+      res.send(result);
+    });
+    app.get("/instructorClasses", async (req, res) => {
+      const result = await instructorCollection.find().toArray();
+      // console.log(result)
+      res.send(result);
+    });
 
     app.post("/selectedClass", async (req, res) => {
       const body = req.body;
       body.createdAt = new Date();
       delete body._id;
-      const exists = await selectedClassCollection.findOne({ name: body.name, email: body.email });
+      const exists = await selectedClassCollection.findOne({
+        name: body.name,
+        email: body.email,
+      });
       if (!exists) {
         const result = await selectedClassCollection.insertOne(body);
         if (result?.insertedId) {
@@ -76,7 +89,7 @@ async function run() {
         res.status(404).send({
           message: "can't select the same class again",
           status: false,
-        })
+        });
       }
     });
     app.get("/user/:email", async (req, res) => {
@@ -94,7 +107,7 @@ async function run() {
           status: false,
         });
       }
-    })
+    });
     app.get("/checkInstructor/:email", async (req, res) => {
       const { email } = req.params;
       // console.log(email);
@@ -110,7 +123,7 @@ async function run() {
           status: false,
         });
       }
-    })
+    });
     app.get("/checkAdmin/:email", async (req, res) => {
       const { email } = req.params;
       // console.log(email);
@@ -126,7 +139,7 @@ async function run() {
           status: false,
         });
       }
-    })
+    });
     app.get("/checkUser/:email", async (req, res) => {
       const { email } = req.params;
       // console.log(email);
@@ -140,14 +153,16 @@ async function run() {
           status: false,
         });
       }
-    })
+    });
 
-    app.get('/selectedClass/:email', async (req, res) => {
+    app.get("/selectedClass/:email", async (req, res) => {
       const { email } = req.params;
-      const result = await selectedClassCollection.find({ email: email }).toArray()
+      const result = await selectedClassCollection
+        .find({ email: email })
+        .toArray();
       // console.log(result)
-      res.send(result)
-    })
+      res.send(result);
+    });
 
     app.delete("/selectedClass/:id", async (req, res) => {
       const id = req.params.id;
@@ -161,7 +176,10 @@ async function run() {
       console.log(id);
       const query = { _id: new ObjectId(id) };
       const deleteClass = await selectedClassCollection.deleteOne(query);
-      const update = await classCollection.updateOne({ name: req.body.name }, { $inc: { availableSeats: -1 } });
+      const update = await classCollection.updateOne(
+        { name: req.body.name },
+        { $inc: { availableSeats: -1, enrolledStudent: 1 } }
+      );
       delete req.body._id;
       req.body.createdAt = new Date();
       const add = await enrolledClassCollection.insertOne(req.body);
@@ -175,30 +193,88 @@ async function run() {
       }
     });
 
-    app.get('/enrolledClasses/:email', async (req, res) => {
+    app.get("/enrolledClasses/:email", async (req, res) => {
       const { email } = req.params;
-      const result = await enrolledClassCollection.find({ email: email }).toArray()
+      const result = await enrolledClassCollection
+        .find({ email: email })
+        .toArray();
       // console.log(result)
-      res.send(result)
-    })
+      res.send(result);
+    });
+    app.post("/addClass", async (req, res) => {
+      const data = req.body;
+      // console.log(data);
+      const result = await classCollection.insertOne(data);
+      res.send(result);
+    });
 
-app.get('/instructorClasses', async(req, res)=>{
-    const result = await instructorCollection.find().toArray()
-    // console.log(result)
-    res.send(result)
-})
+    app.get("/getClassForInstructor/:email", async (req, res) => {
+      const { email } = req.params;
+      const result = await classCollection
+        .find({ instructorEmail: email })
+        .toArray();
+      res.send(result);
+    });
 
+    app.get("/allClasses", async (req, res) => {
+      const result = await classCollection.find().toArray();
+      // console.log(result)
+      res.send(result);
+    });
 
+    app.put("/approveClass/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await classCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { status: "approved" } }
+      );
+      res.send(result);
+    });
+
+    app.post("/deny/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id, req.body);
+      const result = await classCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { status: "denied", feedback: req.body.feedback } }
+      );
+      res.send(result);
+    });
+
+    app.get("/getUsers", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.put("/makeAdmin/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      const result = await usersCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { role: "admin" } }
+      );
+      res.send(result);
+    });
+    app.put("/makeInstructor/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      const result = await usersCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { role: "instructor" } }
+      );
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
   }
 }
 run().catch(console.dir);
-
 
 app.get("/", (req, res) => {
   res.send("Summer camp Server is running");
