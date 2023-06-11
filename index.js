@@ -54,7 +54,7 @@ async function run() {
       res.send(result);
     });
 
-      // get classes role in DB
+    // get classes role in DB
 
     app.get("/getClasses", async (req, res) => {
       const result = await classCollection
@@ -69,7 +69,7 @@ async function run() {
       res.send(result);
     });
 
-      // post classes role in DB
+    // post classes role in DB
     app.post("/selectedClass", async (req, res) => {
       const body = req.body;
       body.createdAt = new Date();
@@ -96,7 +96,7 @@ async function run() {
       }
     });
 
-      // get user email and role in DB
+    // get user email and role in DB
 
     app.get("/user/:email", async (req, res) => {
       const { email } = req.params;
@@ -115,7 +115,7 @@ async function run() {
       }
     });
 
-      // checkInstructor email and role in DB
+    // checkInstructor email and role in DB
 
     app.get("/checkInstructor/:email", async (req, res) => {
       const { email } = req.params;
@@ -134,7 +134,7 @@ async function run() {
       }
     });
 
-      // checkAdmin email and role in DB
+    // checkAdmin email and role in DB
 
     app.get("/checkAdmin/:email", async (req, res) => {
       const { email } = req.params;
@@ -153,7 +153,7 @@ async function run() {
       }
     });
 
-     // checkUser email and role in DB
+    // checkUser email and role in DB
 
     app.get("/checkUser/:email", async (req, res) => {
       const { email } = req.params;
@@ -170,7 +170,7 @@ async function run() {
       }
     });
 
-  // selected email and role in DB
+    // selected email and role in DB
 
     app.get("/selectedClass/:email", async (req, res) => {
       const { email } = req.params;
@@ -181,7 +181,7 @@ async function run() {
       res.send(result);
     });
 
-      // delete with id and role in DB
+    // delete with id and role in DB
 
     app.delete("/selectedClass/:id", async (req, res) => {
       const id = req.params.id;
@@ -190,7 +190,7 @@ async function run() {
       res.send(result);
     });
 
-      // payment method implement
+    // payment method implement
 
     app.post("/payment", async (req, res) => {
       const id = req.body._id;
@@ -214,8 +214,7 @@ async function run() {
       }
     });
 
-    
-      // get enrolledClasses with email and role in DB
+    // get enrolledClasses with email and role in DB
 
     app.get("/enrolledClasses/:email", async (req, res) => {
       const { email } = req.params;
@@ -232,7 +231,7 @@ async function run() {
       res.send(result);
     });
 
-     // get getClassForInstructor with email and role in DB
+    // get getClassForInstructor with email and role in DB
 
     app.get("/getClassForInstructor/:email", async (req, res) => {
       const { email } = req.params;
@@ -242,14 +241,15 @@ async function run() {
       res.send(result);
     });
 
-
-      // get allClasses with email and role in DB
+    // get allClasses with email and role in DB
 
     app.get("/allClasses", async (req, res) => {
       const result = await classCollection.find().toArray();
       // console.log(result)
       res.send(result);
     });
+
+ // put approvedClasses with id and role in DB
 
     app.put("/approveClass/:id", async (req, res) => {
       const id = req.params.id;
@@ -259,6 +259,8 @@ async function run() {
       );
       res.send(result);
     });
+
+     // jpost deny with id and role in DB
 
     app.post("/deny/:id", async (req, res) => {
       const id = req.params.id;
@@ -270,10 +272,14 @@ async function run() {
       res.send(result);
     });
 
+     // getusers with  role in DB
+
     app.get("/getUsers", async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
+
+     // put make admin wjith id and role in DB
 
     app.put("/makeAdmin/:id", async (req, res) => {
       const id = req.params.id;
@@ -284,6 +290,9 @@ async function run() {
       );
       res.send(result);
     });
+
+      // put make jinstructor wjith id and role in DB
+
     app.put("/makeInstructor/:id", async (req, res) => {
       const id = req.params.id;
       // console.log(id);
