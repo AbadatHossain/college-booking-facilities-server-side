@@ -54,6 +54,8 @@ async function run() {
       res.send(result);
     });
 
+      // get classes role in DB
+
     app.get("/getClasses", async (req, res) => {
       const result = await classCollection
         .find({ status: "approved" })
@@ -67,6 +69,7 @@ async function run() {
       res.send(result);
     });
 
+      // post classes role in DB
     app.post("/selectedClass", async (req, res) => {
       const body = req.body;
       body.createdAt = new Date();
@@ -92,6 +95,9 @@ async function run() {
         });
       }
     });
+
+      // get user email and role in DB
+
     app.get("/user/:email", async (req, res) => {
       const { email } = req.params;
       // console.log(email);
@@ -108,6 +114,9 @@ async function run() {
         });
       }
     });
+
+      // checkInstructor email and role in DB
+
     app.get("/checkInstructor/:email", async (req, res) => {
       const { email } = req.params;
       // console.log(email);
@@ -124,6 +133,9 @@ async function run() {
         });
       }
     });
+
+      // checkAdmin email and role in DB
+
     app.get("/checkAdmin/:email", async (req, res) => {
       const { email } = req.params;
       // console.log(email);
@@ -140,6 +152,9 @@ async function run() {
         });
       }
     });
+
+     // checkUser email and role in DB
+
     app.get("/checkUser/:email", async (req, res) => {
       const { email } = req.params;
       // console.log(email);
@@ -155,6 +170,8 @@ async function run() {
       }
     });
 
+  // selected email and role in DB
+
     app.get("/selectedClass/:email", async (req, res) => {
       const { email } = req.params;
       const result = await selectedClassCollection
@@ -164,12 +181,16 @@ async function run() {
       res.send(result);
     });
 
+      // delete with id and role in DB
+
     app.delete("/selectedClass/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await selectedClassCollection.deleteOne(query);
       res.send(result);
     });
+
+      // payment method implement
 
     app.post("/payment", async (req, res) => {
       const id = req.body._id;
@@ -193,6 +214,9 @@ async function run() {
       }
     });
 
+    
+      // get enrolledClasses with email and role in DB
+
     app.get("/enrolledClasses/:email", async (req, res) => {
       const { email } = req.params;
       const result = await enrolledClassCollection
@@ -208,6 +232,8 @@ async function run() {
       res.send(result);
     });
 
+     // get getClassForInstructor with email and role in DB
+
     app.get("/getClassForInstructor/:email", async (req, res) => {
       const { email } = req.params;
       const result = await classCollection
@@ -215,6 +241,9 @@ async function run() {
         .toArray();
       res.send(result);
     });
+
+
+      // get allClasses with email and role in DB
 
     app.get("/allClasses", async (req, res) => {
       const result = await classCollection.find().toArray();
